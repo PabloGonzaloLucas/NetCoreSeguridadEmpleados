@@ -1,0 +1,21 @@
+﻿@using System.Security.Claims
+<h1>Bienvenido Mr/Mrs @Context.User.Identity.Name !!!!</h1>
+<ul class="list-group">
+    <li class="list-group-item">
+        Oficio: @Context.User.FindFirst(ClaimTypes.Role).Value
+    </li>
+    <li class="list-group-item">
+        Salario: @Context.User.FindFirst("Salario").Value
+    </li>
+    <li class="list-group-item">
+        Departanento: @Context.User.FindFirst("Departamento").Value
+    </li>
+</ul>
+<h4>Todos los claims del usuario</h4>
+<ul>
+    @foreach(Claim claim in Context.User.Claims)
+    {
+        <li>@claim.Type: <b>@claim.Value</b></li>
+    }
+</ul>
+<img src="~/images/user.png" style="width:150px;height:150px"/>
