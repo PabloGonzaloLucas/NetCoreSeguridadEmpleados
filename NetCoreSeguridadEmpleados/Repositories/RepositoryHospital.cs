@@ -54,7 +54,7 @@ namespace NetCoreSeguridadEmpleados.Repositories
 
         public async Task<bool> TieneSubordinados(int id)
         {
-            return this.context.Empleados.Any(e => e.Dir == id);
+            return await this.context.Empleados.AnyAsync(e => e.Dir == id);
         }
     }
 }
