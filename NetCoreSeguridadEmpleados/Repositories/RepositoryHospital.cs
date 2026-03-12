@@ -49,6 +49,7 @@ namespace NetCoreSeguridadEmpleados.Repositories
         {
             Empleado emp = await this.FindEmpleadoAsync(id);
             this.context.Empleados.Remove(emp);
+            await this.context.SaveChangesAsync();
         }
 
         public async Task<bool> TieneSubordinados(int id)

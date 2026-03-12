@@ -68,7 +68,7 @@ namespace NetCoreSeguridadEmpleados.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await this.repo.DeleteEmpleado(id);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Empleados");
         }
 
     }
