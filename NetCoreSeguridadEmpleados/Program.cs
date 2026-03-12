@@ -1,8 +1,22 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using NetCoreSeguridadEmpleados.Data;
+using NetCoreSeguridadEmpleados.Policies;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IAuthorizationHandler, TieneSubordinadosHandler>();
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("SOLOJEFES", policy => policy.RequireRole("PRESIDENTE", "DIRECTOR", "ANALISTA"));
+    opt.AddPolicy("AdminOnly",
+        policy => policy.RequireClaim("Admin"));
+    opt.AddPolicy("SoloRicos", policy => policy.Requirements.Add(new OverSalarioRequirement()));
+    opt.AddPolicy("TieneSubordinados", policy => policy.Requirements.Add(new TieneSubordinadosRequirement()));
+});
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddAuthentication(opt =>
@@ -10,9 +24,16 @@ builder.Services.AddAuthentication(opt =>
     opt.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     opt.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     opt.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-}).AddCookie();
+}).AddCookie(
+    CookieAuthenticationDefaults.AuthenticationScheme,
+    config =>
+    {
+        config.AccessDeniedPath = "/Managed/ErrorAcceso";
+    }
+);
 // Add services to the container.
-builder.Services.AddControllersWithViews(opt => opt.EnableEndpointRouting = false);
+builder.Services.AddControllersWithViews(opt => opt.EnableEndpointRouting = false)
+    .AddSessionStateTempDataProvider();
 string connectionString = builder.Configuration.GetConnectionString("SqlHospital");
 builder.Services.AddDbContext<HospitalContext>(opt => opt.UseSqlServer(connectionString));
 builder.Services.AddTransient<NetCoreSeguridadEmpleados.Repositories.RepositoryHospital>();
